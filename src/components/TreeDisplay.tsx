@@ -1,12 +1,9 @@
-// src/components/GraphDisplay.tsx
-import React, { useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5hierarchy from "@amcharts/amcharts5/hierarchy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
-import { convertToGraphData } from "../utils/algofileFolderData";
-import { fileFolderDatas } from "../data/fileFolderData";
 
-const GraphDisplay: React.FC = () => {
+const TreeDisplay: React.FC = () => {
   useLayoutEffect(() => {
     const root = am5.Root.new("chartdiv");
 
@@ -32,7 +29,7 @@ const GraphDisplay: React.FC = () => {
     // Create series
     // https://www.amcharts.com/docs/v5/charts/hierarchy/#Adding
     let series = zoomableContainer.contents.children.push(
-      am5hierarchy.Pack.new(root, {
+      am5hierarchy.Tree.new(root, {
         singleBranchOnly: false,
         downDepth: 1,
         initialDepth: 10,
@@ -42,47 +39,57 @@ const GraphDisplay: React.FC = () => {
       })
     );
 
-    series.circles.template.setAll({});
-
     series.labels.template.set("minScale", 0);
 
-    let selectedDataItem: any;
+    // Generate and set data
+    // https://www.amcharts.com/docs/v5/charts/hierarchy/#Setting_data
+    let maxLevels = 3;
+    let maxNodes = 3;
+    let maxValue = 100;
 
-    // handle clicking on nodes and link/unlink them
-    series.nodes.template.events.on("click", function (e) {
-      // check if we have a selected data item
-      let targetDataItem = e.target.dataItem;
-      if (targetDataItem) {
+    let data = {
+      name: "Root",
+      children: [],
+    };
+    generateLevel(data, "", 0);
+
+    series.data.setAll([data]);
+    series.set("selectedDataItem", series.dataItems[0]);
+
+    function generateLevel(data: any, name: any, level: any) {
+      for (var i = 0; i < Math.ceil(maxNodes * Math.random()) + 1; i++) {
+        let nodeName = name + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[i];
+        let child: any;
+        if (level < maxLevels) {
+          child = {
+            name: nodeName + level,
+          };
+
+          if (level > 0 && Math.random() < 0.5) {
+            child.value = Math.round(Math.random() * maxValue);
+          } else {
+            child.children = [];
+            generateLevel(child, nodeName + i, level + 1);
+          }
+        } else {
+          child = {
+            name: name + i,
+            value: Math.round(Math.random() * maxValue),
+          };
+        }
+        data.children.push(child);
       }
-    });
 
-    // Gestion de la sélection pour chaque nœud
-    series.nodes.template.events.on("click", (event) => {
-      const node = event.target;
-
-      // Réinitialiser les autres nœuds
-      series.nodes.each((otherNode) => {
-        otherNode.setAll({
-          opacity: 0.3, // Épaisseur par défaut
-        });
-      });
-
-      // Appliquer les changements de bordure pour le nœud sélectionné
-      node.setAll({
-        opacity: 1, // Épaisseur augmentée pour l'élément sélectionné
-      });
-    });
-
-    const graphData = convertToGraphData(fileFolderDatas);
-    series.data.setAll(graphData);
+      level++;
+      return data;
+    }
 
     // Make stuff animate on load
     series.appear(1000, 100);
 
     return () => root.dispose();
   }, []);
-
   return <div id="chartdiv" style={{ width: "100%", height: "700px" }}></div>;
 };
 
-export default GraphDisplay;
+export default TreeDisplay;

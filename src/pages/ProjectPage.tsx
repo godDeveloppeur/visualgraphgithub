@@ -6,6 +6,7 @@ import GraphDisplay from "../components/GraphDisplay";
 import FilterPanel from "../components/FilterPanel";
 import FileMetrics from "../components/FileMetrics";
 import { mockFiles } from "../data/mockData";
+import TreeDisplay from "../components/TreeDisplay";
 
 const { Title } = Typography;
 
@@ -35,26 +36,30 @@ const ProjectPage: React.FC = () => {
     : null;
 
   return (
-    <div style={{ padding: "20px" }}>
+    <div style={{ padding: "20px" }} className="container_style1">
       {project ? (
         <>
-          <Title level={2}>{project.name} Analysis</Title>
-          <Row gutter={16}>
-            <Col span={16}>
-              <GraphDisplay />
-            </Col>
-            <Col span={8}>
-              <FilterPanel />
-            </Col>
-          </Row>
-          {selectedMetrics && (
-            <div style={{ marginTop: "20px" }}>
-              <FileMetrics
-                filename={selectedMetrics.filename}
-                metrics={selectedMetrics}
-              />
+          <div>
+            <Title level={2}>{project.name} Analysis</Title>
+            <div className="center_container">
+              <Row gutter={16}>
+                <Col span={16}>
+                  <GraphDisplay />
+                </Col>
+                <Col span={8}>
+                  <FilterPanel />
+                </Col>
+              </Row>
+              {selectedMetrics && (
+                <div style={{ marginTop: "20px" }}>
+                  <FileMetrics
+                    filename={selectedMetrics.filename}
+                    metrics={selectedMetrics}
+                  />
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </>
       ) : (
         <Title level={4}>Project not found</Title>
