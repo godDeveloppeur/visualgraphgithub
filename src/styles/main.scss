@@ -1,0 +1,132 @@
+// src/styles/main.scss
+
+// Couleurs principales
+$primary-color: #1890ff;
+$secondary-color: #f0f2f5;
+$text-color: #333;
+$background-color: #ffffff;
+
+// Style global pour le corps
+body {
+  font-family: Arial, sans-serif;
+  background-color: $secondary-color;
+  margin: 0;
+  padding: 0;
+  color: $text-color;
+}
+
+// Style de la page principale
+.app-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+// Styles des titres
+h2,
+h3 {
+  color: $primary-color;
+}
+
+// Composant CreateProject
+.create-project {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+
+  input {
+    flex: 1;
+  }
+}
+
+// Composant ProjectList
+.project-list {
+  .ant-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: $background-color;
+    border-radius: 4px;
+    margin-bottom: 8px;
+  }
+}
+
+// Composant FilterPanel
+.filter-panel {
+  background-color: $background-color;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .ant-select,
+  .ant-input,
+  .ant-slider {
+    margin-top: 10px;
+  }
+}
+
+// Composant GraphDisplay
+#chartdiv {
+  width: 100%;
+  height: 500px;
+  background-color: $secondary-color;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+// Composant FileMetrics
+.file-metrics {
+  background-color: $background-color;
+  padding: 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  .ant-card {
+    width: 100%;
+    .ant-card-head {
+      color: $primary-color;
+    }
+    .ant-card-body {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+  }
+}
+
+// Styles supplémentaires pour les boutons
+.ant-btn-primary {
+  background-color: $primary-color;
+  border-color: $primary-color;
+
+  &:hover,
+  &:focus {
+    background-color: darken($primary-color, 10%);
+    border-color: darken($primary-color, 10%);
+  }
+}
+
+// Style pour la liste des projets
+.project-list {
+  .ant-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: $background-color;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    transition: all 0.3s;
+
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  }
+}

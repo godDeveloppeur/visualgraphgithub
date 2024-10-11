@@ -1,11 +1,18 @@
 import React from "react";
+import "./styles/main.scss";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import HomePage from "./pages/HomePage";
+import ProjectPage from "./pages/ProjectPage";
 
-function App() {
+const App: React.FC = () => {
   return (
-    <div className="App">
-      <h1>Welcome app</h1>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/project/:projectId" element={<ProjectPage />} />
+      </Routes>
+    </BrowserRouter>
   );
-}
+};
 
 export default App;
