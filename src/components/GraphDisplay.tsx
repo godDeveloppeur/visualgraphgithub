@@ -1,14 +1,19 @@
 // src/components/GraphDisplay.tsx
-import React, { useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect } from "react";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5hierarchy from "@amcharts/amcharts5/hierarchy";
+import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import { convertToGraphData } from "../utils/algofileFolderData";
 import { fileFolderDatas } from "../data/fileFolderData";
+import { GraphNode } from "../models/GraphNode";
 
 const GraphDisplay: React.FC = () => {
+  const graphData = convertToGraphData(fileFolderDatas);
   useLayoutEffect(() => {
     const root = am5.Root.new("chartdiv");
+
+    //let chart = root.container.children.push(am5xy.XYChart.new(root, {}));
 
     // Set themes
     // https://www.amcharts.com/docs/v5/concepts/themes/
@@ -41,8 +46,15 @@ const GraphDisplay: React.FC = () => {
         childDataField: "children",
       })
     );
-
-    series.circles.template.setAll({});
+    series.circles.template.adapters.add("fill", function (fill, target) {
+      if (target.dataItem?.dataContext) {
+        const dataCt: any = target.dataItem?.dataContext;
+        console.log(dataCt.nodeSettings.fill);
+        return dataCt.nodeSettings.fill;
+      } else {
+        return am5.color("rgb(235, 235, 235)");
+      }
+    });
 
     series.labels.template.set("minScale", 0);
 
@@ -73,14 +85,14 @@ const GraphDisplay: React.FC = () => {
       });
     });
 
-    const graphData = convertToGraphData(fileFolderDatas);
+    console.log(graphData);
     series.data.setAll(graphData);
 
     // Make stuff animate on load
     series.appear(1000, 100);
 
     return () => root.dispose();
-  }, []);
+  }, [graphData, fileFolderDatas]);
 
   return <div id="chartdiv" style={{ width: "100%", height: "700px" }}></div>;
 };
