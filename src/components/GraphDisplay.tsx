@@ -5,11 +5,27 @@ import * as am5hierarchy from "@amcharts/amcharts5/hierarchy";
 import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import { convertToGraphData } from "../utils/algofileFolderData";
-import { fileFolderDatas } from "../data/fileFolderData";
+import {
+  smallFileFolderDatas,
+  mediumFileFolderDatas,
+  bigFileFolderDatas,
+} from "../data/fileFolderData";
 import { GraphNode } from "../models/GraphNode";
+import { FileFolderCommits } from "../models/FileFolderCommits";
 
 const GraphDisplay: React.FC = () => {
-  const graphData = convertToGraphData(fileFolderDatas);
+  const randomFileFolderData = (): FileFolderCommits[] => {
+    const options = [
+      smallFileFolderDatas,
+      mediumFileFolderDatas,
+      bigFileFolderDatas,
+    ];
+    const randomIndex = Math.floor(Math.random() * options.length);
+    console.log(randomIndex);
+    return options[randomIndex];
+  };
+
+  const graphData = convertToGraphData(mediumFileFolderDatas);
   useLayoutEffect(() => {
     const root = am5.Root.new("chartdiv");
 
@@ -49,7 +65,6 @@ const GraphDisplay: React.FC = () => {
     series.circles.template.adapters.add("fill", function (fill, target) {
       if (target.dataItem?.dataContext) {
         const dataCt: any = target.dataItem?.dataContext;
-        console.log(dataCt.nodeSettings.fill);
         return dataCt.nodeSettings.fill;
       } else {
         return am5.color("rgb(235, 235, 235)");
@@ -57,8 +72,6 @@ const GraphDisplay: React.FC = () => {
     });
 
     series.labels.template.set("minScale", 0);
-
-    let selectedDataItem: any;
 
     // handle clicking on nodes and link/unlink them
     series.nodes.template.events.on("click", function (e) {
@@ -85,14 +98,13 @@ const GraphDisplay: React.FC = () => {
       });
     });
 
-    console.log(graphData);
     series.data.setAll(graphData);
 
     // Make stuff animate on load
     series.appear(1000, 100);
 
     return () => root.dispose();
-  }, [graphData, fileFolderDatas]);
+  }, [graphData]);
 
   return <div id="chartdiv" style={{ width: "100%", height: "700px" }}></div>;
 };
