@@ -45,9 +45,10 @@ export const convertToGraphData = (
       id: item.id,
       parentId: item.parendId,
       name: item.fileFolderName,
+      value: item.codeLines,
       ...(item.typeFileOrFolder === TypeFileOrFolder.FILE
-        ? { value: item.codeLines } // Ajouter la valeur pour les fichiers
-        : { children: [] }), // Ajouter les enfants pour les dossiers
+        ? { children: null }
+        : { children: [] }),
       nodeSettings: {
         fill: determineNodeColor(item.typeFileOrFolder, item.codeHealh, 0), // Couleur de base, profondeur 0
       },

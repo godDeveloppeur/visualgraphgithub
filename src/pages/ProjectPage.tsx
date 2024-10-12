@@ -5,25 +5,50 @@ import { Typography, Row, Col } from "antd";
 import GraphDisplay from "../components/GraphDisplay";
 import FilterPanel from "../components/FilterPanel";
 import FileMetrics from "../components/FileMetrics";
-import { mockFiles } from "../data/mockData";
-import TreeDisplay from "../components/TreeDisplay";
+import { mockFiles, mockProjets } from "../data/mockData";
+import {
+  smallFileFolderDatas,
+  mediumFileFolderDatas,
+  bigFileFolderDatas,
+} from "../data/fileFolderData";
+import { FileFolderCommits } from "../models/FileFolderCommits";
+import Project from "../models/Project";
 
 const { Title } = Typography;
-
-interface Project {
-  id: string;
-  repoUrl: string;
-  name: string;
-}
 
 const ProjectPage: React.FC = () => {
   const { projectId } = useParams<{ projectId: string }>();
   const [project, setProject] = useState<Project | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [fileFolderDatas, setFileFolderDatas] = useState<FileFolderCommits[]>(
+    []
+  );
+  const [filterMetrics, setFilterMetrics] = useState<{
+    codeLines: number;
+    codeHealh: number;
+    LineCoverage: number;
+    maxCodeLine: number;
+  }>({
+    codeLines: 0,
+    codeHealh: 0,
+    LineCoverage: 0,
+    maxCodeLine: 1000,
+  });
 
   useEffect(() => {
-    const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    const options = [
+      smallFileFolderDatas,
+      mediumFileFolderDatas,
+      bigFileFolderDatas,
+    ];
+    let savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    savedProjects = [...mockProjets, ...savedProjects];
     const foundProject = savedProjects.find((p: Project) => p.id === projectId);
+    setFileFolderDatas(options[foundProject.type]);
+    setFilterMetrics({
+      ...filterMetrics,
+      maxCodeLine: options[foundProject.type][0].codeLines,
+    });
     setProject(foundProject);
   }, [projectId]);
 
@@ -44,10 +69,16 @@ const ProjectPage: React.FC = () => {
             <div className="center_container">
               <Row gutter={16}>
                 <Col span={16}>
-                  <GraphDisplay />
+                  <GraphDisplay
+                    filterMetrics={filterMetrics}
+                    fileFolderDatas={fileFolderDatas}
+                  />
                 </Col>
                 <Col span={8}>
-                  <FilterPanel />
+                  <FilterPanel
+                    filterMetrics={filterMetrics}
+                    setFilterMetrics={setFilterMetrics}
+                  />
                 </Col>
               </Row>
               {selectedMetrics && (

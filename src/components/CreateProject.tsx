@@ -16,6 +16,7 @@ const CreateProject = ({
         id: Date.now().toString(),
         repoUrl,
         name: repoUrl.split("/").pop() || "Untitled Project",
+        type: Math.floor(Math.random() * 3),
       };
 
       const savedProjects = JSON.parse(

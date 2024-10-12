@@ -3,21 +3,22 @@ import React, { useState, useEffect } from "react";
 import { List, Button, Popconfirm, message } from "antd";
 import { useNavigate } from "react-router-dom";
 import Project from "../models/Project";
+import { mockProjets } from "../data/mockData";
 
 const ProjectList = ({ newProjet }: { newProjet: Project | undefined }) => {
   const [projects, setProjects] = useState<Project[]>([]);
   const navigate = useNavigate();
 
   useEffect(() => {
-    const savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    let savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+    savedProjects = [...mockProjets, ...savedProjects];
     setProjects(savedProjects);
   }, []);
 
   useEffect(() => {
     if (newProjet) {
-      const savedProjects = JSON.parse(
-        localStorage.getItem("projects") || "[]"
-      );
+      let savedProjects = JSON.parse(localStorage.getItem("projects") || "[]");
+      savedProjects = [...mockProjets, ...savedProjects];
       setProjects(savedProjects);
     }
   }, [newProjet]);
@@ -26,8 +27,11 @@ const ProjectList = ({ newProjet }: { newProjet: Project | undefined }) => {
     const updatedProjects = projects.filter(
       (project) => project.id !== projectId
     );
-    setProjects(updatedProjects);
-    localStorage.setItem("projects", JSON.stringify(updatedProjects));
+    setProjects(updatedProjects.filter((pj) => !mockProjets.includes(pj)));
+    localStorage.setItem(
+      "projects",
+      JSON.stringify(updatedProjects.filter((pj) => !mockProjets.includes(pj)))
+    );
     message.success("Project deleted successfully");
   };
 

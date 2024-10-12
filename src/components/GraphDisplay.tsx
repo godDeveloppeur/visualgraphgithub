@@ -1,38 +1,55 @@
 // src/components/GraphDisplay.tsx
-import React, { useEffect, useLayoutEffect } from "react";
+import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import * as am5 from "@amcharts/amcharts5";
 import * as am5hierarchy from "@amcharts/amcharts5/hierarchy";
-import * as am5xy from "@amcharts/amcharts5/xy";
 import am5themes_Animated from "@amcharts/amcharts5/themes/Animated";
 import { convertToGraphData } from "../utils/algofileFolderData";
-import {
-  smallFileFolderDatas,
-  mediumFileFolderDatas,
-  bigFileFolderDatas,
-} from "../data/fileFolderData";
-import { GraphNode } from "../models/GraphNode";
+
 import { FileFolderCommits } from "../models/FileFolderCommits";
+import { GraphNode } from "../models/GraphNode";
+import { TypeFileOrFolder } from "../enums/TypeFileOrFolder";
 
-const GraphDisplay: React.FC = () => {
-  const randomFileFolderData = (): FileFolderCommits[] => {
-    const options = [
-      smallFileFolderDatas,
-      mediumFileFolderDatas,
-      bigFileFolderDatas,
-    ];
-    const randomIndex = Math.floor(Math.random() * options.length);
-    console.log(randomIndex);
-    return options[randomIndex];
+const GraphDisplay = ({
+  filterMetrics,
+  fileFolderDatas,
+}: {
+  filterMetrics: {
+    codeLines: number;
+    codeHealh: number;
+    LineCoverage: number;
+    maxCodeLine: number;
   };
+  fileFolderDatas: FileFolderCommits[];
+}) => {
+  const [filterFileFolderDatas, setFilterFileFolderDatas] =
+    useState<FileFolderCommits[]>(fileFolderDatas);
+  const [graphData, setGraphData] = useState<GraphNode[]>(
+    convertToGraphData(fileFolderDatas)
+  );
 
-  const graphData = convertToGraphData(mediumFileFolderDatas);
+  useEffect(() => {
+    setGraphData(convertToGraphData(filterFileFolderDatas));
+  }, [filterFileFolderDatas]);
+
+  useEffect(() => {
+    setFilterFileFolderDatas(
+      fileFolderDatas.filter((dt) => {
+        if (dt.typeFileOrFolder === TypeFileOrFolder.FILE) {
+          return (
+            dt.codeHealh >= filterMetrics.codeHealh &&
+            dt.codeLines >= filterMetrics.codeLines &&
+            dt.LineCoverage > filterMetrics.LineCoverage
+          );
+        } else {
+          return dt.codeLines >= filterMetrics.codeLines;
+        }
+      })
+    );
+  }, [filterMetrics]);
+
   useLayoutEffect(() => {
     const root = am5.Root.new("chartdiv");
 
-    //let chart = root.container.children.push(am5xy.XYChart.new(root, {}));
-
-    // Set themes
-    // https://www.amcharts.com/docs/v5/concepts/themes/
     root.setThemes([am5themes_Animated.new(root)]);
 
     let zoomableContainer = root.container.children.push(
@@ -51,7 +68,6 @@ const GraphDisplay: React.FC = () => {
     );
 
     // Create series
-    // https://www.amcharts.com/docs/v5/charts/hierarchy/#Adding
     let series = zoomableContainer.contents.children.push(
       am5hierarchy.Pack.new(root, {
         singleBranchOnly: false,
