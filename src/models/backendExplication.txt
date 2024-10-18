@@ -1,0 +1,73 @@
+Diagrammes à bulles pour fichier et dossier ``
+
+
+Pour la création des fichiers modifiés : 
+- tu peux parcourir les commits qui sont présent entre la dates de début et la date de fin.
+Sur chaque commit, tu récupères les fichiers modifiés, si le fichier n'existe pas dans la `ListFileFolderModified` tu peux l'ajouté
+sous forme d'objet `FileFolderModified`en récupérant l'information necessaire. Si le fichier existe déjà dans la liste parce qu'il
+a déjà été modifié dans un commit précedent, tu modifie l'objet qui le représente en changeant principalement : `nbCodeLinesModified`, 
+`modifiedRateAddOrDelCodeLines`
+
+- Lorsque tu créais un fichier, n'oublie pas de mettre son niveau, (EX : "activerecord/test/support/async_helper.rb" , Level = 3 (nombre de "/") ),
+il faut aussi ajouté le nom de son dossier parent dans `parentFileFolderName` (EX : pour le dossier test : parentFileFolderName = "activerecord") et 
+pour tout ceux n'ayant pas de fichier parent comme activerecord (parentFileFolderName = "main")
+
+Pour la création des dossiers : 
+
+- Tu commence par créer un fichier qui se nomme main ou master avec niveau 0 donc dans `FileFolderModified` => Level = 0
+
+- Lorsque tu as fini de génerer la liste des fichiers modifiés, tu peux la parcourir pour cette liste
+Dans chaque fichier, tu recupère le filePath, tu le découpe par niveau et tu créais le dossier avec, c'est-à dire (EX : "activerecord/test/support/async_helper.rb" ,
+activerecord : dossier de niveau 1 donc dans `FileFolderModified` => level = 1, test : dossier de niveau 2, etc..). Et bien sure si le dossier existe déjà tu le saute.
+
+- Maintenant que les dossiers sont crées, le but est en faite d'ajouté tous les fichiers et dossiers dans des dossiers de niveau - 1
+à eux (Donc un fichier ou dossier de niveau 1 entre dans un dossier de niveau 0).Pour cela il faudrait effectué une boucle de niveau ( 0 à 1000). 
+La boucle devrait s'arreté lorsque le niveau du i (index) n'existe dans aucun dossier, donc au sixième tour, s'il ne trouve pas de fichier ou dossier de niveau 6
+il arrète la boucle. Dans la boucle, tu recupère avec un filtre les dossiers du niveau de l'index et dans une autre liste, tu recupère les fichiers et dossiers ayant
+le niveau de l'index + 1. Le but est d'ajouter dans les fichiers ou dossiers de l'index + 1 le 'parentFileFolderId' du dossier du niveau de l'index en vérifiant que 
+ce dossier soit le bon (avec parentFileFolderName).
+
+NB : Pourquoi je veux l'ID lorsqu'on a déjà le `parentFileFolderName` ? c'est parce que un fichier peut être inclut dans un dossier support commme `async_helper.rb`
+("activerecord/test/support/async_helper.rb") bien sure on se dirait c'est impossible qu'il y'est un autre dossier de même nom que support dans le dossier test. 
+Mais dans le dossier activerecord, c'est possible d'avoir un autre dossier qui se nommera aussi support et dans une liste comme `ListFileFolderModified`, on n'a pas
+d'hiérachie de fichier donc il faut quelque chose qui identifira son dossier parent de manière unique.
+
+- Tu peux génerer l'id avec la librairie uuid
+
+NB : Pour le nombre de ligne de code modifié ou ajouté ou supprimé dans un dossier, tu peux faire la somme de ses fichiers et dossiers présent à l'intérieur de lui.
+
+Pour Les variables importantes : 
+
+- Level : niveau du fichier ou dossier dans l'aborescence.
+- nbCodeLinesModified : nombre de ligne de code modifiés entre la date de début et fin envoyé. Celui-ci représentera la grandeur du cercle. 
+- modifiedRateAddOrDelCodeLines : cette valeur est calculée par cette formule : (nombre de ligne de code ajouté - nombre de ligne de code supprimé) * 100 / (nombre de 
+ligne de code présent dans le fichier ). Ceci représentera la couleur du cercle. 
+
+Exemple 1 : On a deux fichiers. File1 (nbCodeLines : 650, nbAddCodeLines: 150, nbDeleteCodeLines: 25), File2 (nbCodeLines : 200, nbAddCodeLines: 150, nbDeleteCodeLines: 25)
+Resultat : File 1 (modifiedRateAddOrDelCodeLines : (150 - 25) * 100 / 650 = 19.23), File 2 (modifiedRateAddOrDelCodeLines : (150 - 25) * 100 / 200 = 62.5)
+Représentation de couleur: File 1 : vert pale, File 2 vert clair.
+
+Exemple 2 : On a deux fichiers. File1 (nbCodeLines : 650, nbAddCodeLines: 25, nbDeleteCodeLines: 150), File2 (nbCodeLines : 200, nbAddCodeLines: 25, nbDeleteCodeLines: 150)
+Resultat : File 1 (modifiedRateAddOrDelCodeLines : (25 - 150) * 100 / 650 = - 19.23), File 2 (modifiedRateAddOrDelCodeLines : (25 - 150) * 100 / 200 = - 62.5)
+Représentation de couleur: File 1 : jaune, File 2 rouge.
+
+
+Porté de changement sur le repo
+
+Pour les variables importantes :
+- date : Date à laquel a été effectué le commit. Celui-ci représentera l'axe X.
+- nbCodeLinesModified : Nombre de ligne de code modifiés entre la date de début et fin envoyé. Celui-ci représentera l'axe Y.
+- nbModifiedFiles : Nombre de fichiers modifiés dans le commit représente la porté du commit. Celui-ci représentera la grandeur du cercle.
+- typeOfFiles : Type de fichier (Configuration, Test, Documentation, Deployment, Production, Development), ici tu prendras le type qui revient le plus dans 
+la majorité des fichiers. Celui-ci représentera la couleur du cercle.
+
+
+Nombre de commits par developpeurs
+
+Pour les variables importantes :
+- name : Nom de l'auteur
+- nbCommits : Nombre de commits effectué par cet auteur pendant cette période (entre la date de début et fin envoyé). Celui-ci représente la grosseur du cercle.
+- commitsCategory: Nombre de commits effectué par catégorie de fichiers. Celui-ci représente les cercles qui seront à l'intérieur du cercle de l'auteur.
+- ListCommitsCategory: Dans cette liste, on aura un commitsCategory objet pour chacune des catégories de l'enum `ModifiedCategory`
+
+La couleur des cercles à l'intérieur des cercles des auteurs seront mises en fonction de la catégorie de fichier.
